@@ -293,7 +293,7 @@ export function Settings() {
 }
 
 export function Auth() {
-  const { signIn, signUp, loading: appLoading, t } = useApp()
+  const { signIn, signUp, loading: appLoading, t, setShowLanding } = useApp()
   const [submitting, setSubmitting] = useState(false)
   const [mode, setMode] = useState('login') // 'login' or 'signup'
 
@@ -328,62 +328,148 @@ export function Auth() {
       alignItems: 'center',
       justifyContent: 'center',
       background: 'radial-gradient(circle at top right, var(--surface) 0%, var(--bg) 100%)',
-      padding: 20
+      padding: 20,
+      position: 'relative'
     }}>
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={mode}
-          initial={{ opacity: 0, y: 20, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -20, scale: 0.95 }}
-          transition={{ duration: 0.4, ease: 'easeOut' }}
-          className="card auth-card glass"
-          style={{ width: '100%', maxWidth: 420, padding: '40px 32px' }}
-        >
-          <div style={{ textAlign: 'center', marginBottom: 32 }}>
-            <img
-              src={logo}
-              alt="BCH Logo"
-              style={{ width: 80, height: 80, margin: '0 auto 16px', borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--surface)' }}
-            />
-            <h1 style={{ fontFamily: 'Fraunces, serif', fontSize: 24 }}>{mode === 'login' ? 'Welcome Back' : 'Join BCH'}</h1>
-            <p style={{ color: 'var(--muted)', fontSize: 13, marginTop: 4 }}>{mode === 'login' ? 'Sign in to manage your stay' : 'Create an account to get started'}</p>
+      <button
+        onClick={() => setShowLanding(true)}
+        className="btn btn-ghost"
+        style={{
+          position: 'absolute',
+          top: 20,
+          left: 20,
+          zIndex: 100,
+          borderRadius: 8,
+          fontSize: 13,
+          fontWeight: 600,
+          gap: 8,
+          background: 'var(--surface)',
+          border: '1px solid var(--border)'
+        }}
+      >
+        <SvgIcon d={ICONS.home} size={16} />
+        Home
+      </button>
+
+      {/* 3D Flip Card Container */}
+      <div style={{
+        perspective: '1200px',
+        width: '100%',
+        maxWidth: 420,
+      }}>
+        <div style={{
+          position: 'relative',
+          width: '100%',
+          transformStyle: 'preserve-3d',
+          transition: 'transform 0.7s cubic-bezier(0.4, 0, 0.2, 1)',
+          transform: mode === 'signup' ? 'rotateY(180deg)' : 'rotateY(0deg)',
+        }}>
+
+          {/* ─── FRONT FACE: LOGIN ─── */}
+          <div
+            className="card auth-card glass"
+            style={{
+              width: '100%',
+              padding: '40px 32px',
+              backfaceVisibility: 'hidden',
+              WebkitBackfaceVisibility: 'hidden',
+            }}
+          >
+            <div style={{ textAlign: 'center', marginBottom: 32 }}>
+              <img
+                src={logo}
+                alt="BCH Logo"
+                style={{ width: 80, height: 80, margin: '0 auto 16px', borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--surface)' }}
+              />
+              <h1 style={{ fontFamily: 'Fraunces, serif', fontSize: 24 }}>Welcome Back</h1>
+              <p style={{ color: 'var(--muted)', fontSize: 13, marginTop: 4 }}>Sign in to manage your stay</p>
+            </div>
+
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div className="form-group">
+                <label className="form-label">Email Address</label>
+                <input className="form-input" type="email" name="email" required placeholder="email@example.com" style={{ background: 'var(--bg)' }} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Password</label>
+                <input className="form-input" type="password" name="password" required placeholder="••••••••" style={{ background: 'var(--bg)' }} />
+              </div>
+
+              <button className="btn btn-accent btn-lg" type="submit" disabled={submitting} style={{ marginTop: 8, height: 48, width: '100%' }}>
+                {submitting && mode === 'login' ? 'Authenticating...' : 'Sign In'}
+              </button>
+            </form>
+
+            <div style={{ textAlign: 'center', marginTop: 32, fontSize: 13, color: 'var(--muted)' }}>
+              Don't have an account?
+              <button
+                className="link"
+                type="button"
+                style={{ marginLeft: 6, fontWeight: 700, color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 'inherit' }}
+                onClick={() => setMode('signup')}
+              >
+                Sign Up
+              </button>
+            </div>
           </div>
 
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {mode === 'signup' && (
+          {/* ─── BACK FACE: SIGNUP ─── */}
+          <div
+            className="card auth-card glass"
+            style={{
+              width: '100%',
+              padding: '40px 32px',
+              backfaceVisibility: 'hidden',
+              WebkitBackfaceVisibility: 'hidden',
+              transform: 'rotateY(180deg)',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+            }}
+          >
+            <div style={{ textAlign: 'center', marginBottom: 32 }}>
+              <img
+                src={logo}
+                alt="BCH Logo"
+                style={{ width: 80, height: 80, margin: '0 auto 16px', borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--surface)' }}
+              />
+              <h1 style={{ fontFamily: 'Fraunces, serif', fontSize: 24 }}>Join BCH</h1>
+              <p style={{ color: 'var(--muted)', fontSize: 13, marginTop: 4 }}>Create an account to get started</p>
+            </div>
+
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div className="form-group">
                 <label className="form-label">Full Name</label>
-                <input className="form-input" name="fullName" required placeholder="Timon Biswas" style={{ background: 'var(--bg)' }} />
+                <input className="form-input" name="fullName" required={mode === 'signup'} placeholder="Timon Biswas" style={{ background: 'var(--bg)' }} />
               </div>
-            )}
-            <div className="form-group">
-              <label className="form-label">Email Address</label>
-              <input className="form-input" type="email" name="email" required placeholder="email@example.com" style={{ background: 'var(--bg)' }} />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Password</label>
-              <input className="form-input" type="password" name="password" required placeholder="••••••••" style={{ background: 'var(--bg)' }} />
-            </div>
+              <div className="form-group">
+                <label className="form-label">Email Address</label>
+                <input className="form-input" type="email" name="email" required placeholder="email@example.com" style={{ background: 'var(--bg)' }} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Password</label>
+                <input className="form-input" type="password" name="password" required placeholder="••••••••" style={{ background: 'var(--bg)' }} />
+              </div>
 
-            <button className="btn btn-accent btn-lg" type="submit" disabled={submitting} style={{ marginTop: 8, height: 48, width: '100%' }}>
-              {submitting ? 'Authenticating...' : mode === 'login' ? 'Sign In' : 'Create Account'}
-            </button>
-          </form>
+              <button className="btn btn-accent btn-lg" type="submit" disabled={submitting} style={{ marginTop: 8, height: 48, width: '100%' }}>
+                {submitting && mode === 'signup' ? 'Creating...' : 'Create Account'}
+              </button>
+            </form>
 
-          <div style={{ textAlign: 'center', marginTop: 32, fontSize: 13, color: 'var(--muted)' }}>
-            {mode === 'login' ? "Don't have an account?" : "Already have an account?"}
-            <button
-              className="link"
-              type="button"
-              style={{ marginLeft: 6, fontWeight: 700, color: 'var(--accent)' }}
-              onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
-            >
-              {mode === 'login' ? 'Sign Up' : 'Log In'}
-            </button>
+            <div style={{ textAlign: 'center', marginTop: 32, fontSize: 13, color: 'var(--muted)' }}>
+              Already have an account?
+              <button
+                className="link"
+                type="button"
+                style={{ marginLeft: 6, fontWeight: 700, color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 'inherit' }}
+                onClick={() => setMode('login')}
+              >
+                Log In
+              </button>
+            </div>
           </div>
-        </motion.div>
-      </AnimatePresence>
+        </div>
+      </div>
     </div>
   )
 }

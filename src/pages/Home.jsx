@@ -97,7 +97,7 @@ export default function Home({ onLogin }) {
                     }}>
                         Welcome to {settings.hostel_name}. Experience safe, modern, and spiritual living designed for the students of today.
                     </p>
-                    <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
+                    <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
                         <button className="btn btn-accent btn-lg" onClick={onLogin} style={{ padding: '16px 36px', fontSize: 16 }}>
                             Get Started →
                         </button>

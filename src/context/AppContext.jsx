@@ -7,11 +7,11 @@ const AppContext = createContext()
 
 // 5 beautiful themes
 export const THEMES = {
-  midnight: { name: 'Midnight', bg: '#080c14', surface: '#0f1623', surface2: '#172033', border: '#1e2d45', accent: '#f0a500', accent2: '#e05c2f', text: '#e8f0fe', muted: '#7a8fa6', green: '#22c55e', red: '#ef4444', blue: '#3b82f6', purple: '#a78bfa' },
-  slate: { name: 'Slate', bg: '#f1f5f9', surface: '#ffffff', surface2: '#f8fafc', border: '#e2e8f0', accent: '#0f766e', accent2: '#0d9488', text: '#0f172a', muted: '#64748b', green: '#16a34a', red: '#dc2626', blue: '#2563eb', purple: '#7c3aed' },
-  ocean: { name: 'Ocean', bg: '#020b18', surface: '#041525', surface2: '#062035', border: '#0a3055', accent: '#06b6d4', accent2: '#0891b2', text: '#e0f2fe', muted: '#5b8fa8', green: '#10b981', red: '#f43f5e', blue: '#06b6d4', purple: '#8b5cf6' },
-  forest: { name: 'Forest', bg: '#030f07', surface: '#061409', surface2: '#0a1e0d', border: '#122b16', accent: '#4ade80', accent2: '#22c55e', text: '#dcfce7', muted: '#5c8a67', green: '#4ade80', red: '#f87171', blue: '#60a5fa', purple: '#c084fc' },
-  crimson: { name: 'Crimson', bg: '#0f0508', surface: '#1a0810', surface2: '#250c17', border: '#3d1428', accent: '#f43f5e', accent2: '#e11d48', text: '#ffe4e6', muted: '#9f5a6e', green: '#4ade80', red: '#f43f5e', blue: '#60a5fa', purple: '#c084fc' },
+  midnight: { name: 'Midnight', bg: '#080c14', surface: '#0f1623', surface2: '#172033', border: '#1e2d45', accent: '#f0a500', accent2: '#e05c2f', text: '#e8f0fe', muted: '#7a8fa6', green: '#22c55e', red: '#ef4444', blue: '#3b82f6', purple: '#a78bfa', accent_fg: '#000000' },
+  slate: { name: 'Slate', bg: '#f8fafc', surface: '#ffffff', surface2: '#f1f5f9', border: '#e2e8f0', accent: '#0f172a', accent2: '#334155', text: '#0f172a', muted: '#64748b', green: '#16a34a', red: '#dc2626', blue: '#2563eb', purple: '#7c3aed', accent_fg: '#ffffff' },
+  ocean: { name: 'Ocean', bg: '#020b18', surface: '#041525', surface2: '#062035', border: '#113a69', accent: '#06b6d4', accent2: '#0ea5e9', text: '#e0f2fe', muted: '#648da5', green: '#10b981', red: '#f43f5e', blue: '#0ea5e9', purple: '#8b5cf6', accent_fg: '#000000' },
+  forest: { name: 'Forest', bg: '#030f07', surface: '#061409', surface2: '#0a1e0d', border: '#15311a', accent: '#4ade80', accent2: '#22c55e', text: '#dcfce7', muted: '#6a9675', green: '#4ade80', red: '#f87171', blue: '#60a5fa', purple: '#c084fc', accent_fg: '#000000' },
+  crimson: { name: 'Crimson', bg: '#0f0508', surface: '#1a0810', surface2: '#250c17', border: '#421a2d', accent: '#f43f5e', accent2: '#e11d48', text: '#ffe4e6', muted: '#ad6b7d', green: '#4ade80', red: '#f43f5e', blue: '#60a5fa', purple: '#c084fc', accent_fg: '#ffffff' },
 }
 
 export function AppProvider({ children }) {

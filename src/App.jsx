@@ -38,6 +38,12 @@ const PAGE_MAP = { dashboard: Dashboard, rooms: Rooms, residents: Residents, che
 function Inner() {
   const [page, setPage] = useState('dashboard')
   const [collapsed, setCollapsed] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
+
+  const navigateTo = (id) => {
+    setPage(id)
+    setMobileOpen(false)
+  }
   const {
     unreadCount, connected, settings, user, signOut, isAdmin, loading,
     language, setLanguage, LANGUAGES, t,
@@ -75,8 +81,10 @@ function Inner() {
 
   return (
     <div className="layout">
+      {/* Mobile overlay */}
+      <div className={`sidebar-overlay ${mobileOpen ? 'active' : ''}`} onClick={() => setMobileOpen(false)} />
       {/* Sidebar */}
-      <aside className={`sidebar ${collapsed ? 'collapsed' : ''} `}>
+      <aside className={`sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`}>
         <div className="sidebar-logo">
           <img
             src={logo}
@@ -99,7 +107,7 @@ function Inner() {
             !collapsed && <div key={i} className="nav-group-label">{n.section}</div>
           ) : (
             (!isAdmin && ['rooms', 'residents', 'billing', 'reports', 'settings'].includes(n.id)) ? null : (
-              <button key={n.id} className={`nav - btn ${page === n.id ? 'active' : ''} `} onClick={() => setPage(n.id)}>
+              <button key={n.id} className={`nav-btn ${page === n.id ? 'active' : ''}`} onClick={() => navigateTo(n.id)}>
                 <div className="nav-icon"><SvgIcon d={ICONS[n.icon]} size={18} /></div>
                 {!collapsed && <span className="nav-lbl">{n.label}</span>}
                 {!collapsed && n.badge === 'notif' && unreadCount > 0 && <span className="nav-bdg">{unreadCount}</span>}
@@ -150,6 +158,9 @@ function Inner() {
       {/* Main Container */}
       <main className="main" style={{ marginLeft: collapsed ? 56 : 230 }}>
         <header className="topbar">
+          <button className="mobile-menu-btn" onClick={() => setMobileOpen(!mobileOpen)}>
+            <SvgIcon d={ICONS.menu} size={20} />
+          </button>
           <div className="topbar-title">
             <h1>{t(page) || TITLES[page]}</h1>
             <time>{new Date().toLocaleDateString(language === 'bn' ? 'bn-BD' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}</time>
@@ -159,11 +170,11 @@ function Inner() {
             <button className="btn btn-ghost btn-sm" onClick={() => setLanguage(language === 'en' ? 'bn' : 'en')}>
               {language.toUpperCase()}
             </button>
-            <button className="btn btn-ghost btn-sm" style={{ position: 'relative' }} onClick={() => setPage('notifications')}>
+            <button className="btn btn-ghost btn-sm" style={{ position: 'relative' }} onClick={() => navigateTo('notifications')}>
               <SvgIcon d={ICONS.bell} size={14} />
               {unreadCount > 0 && <span className="notif-dot">{unreadCount}</span>}
             </button>
-            <button className="btn btn-ghost btn-sm" onClick={() => setPage('settings')}>
+            <button className="btn btn-ghost btn-sm" onClick={() => navigateTo('settings')}>
               <SvgIcon d={ICONS.settings} size={14} />
             </button>
           </div>
