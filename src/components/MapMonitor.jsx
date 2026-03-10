@@ -1,160 +1,58 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
+import L from 'leaflet'
 import { useApp } from '../context/AppContext'
 import { SvgIcon, ICONS, Empty } from './ui'
 
-// Loads Google Maps JS API dynamically
-function loadGoogleMaps(apiKey) {
-  return new Promise((resolve, reject) => {
-    if (window.google?.maps) { resolve(window.google.maps); return }
-    const script = document.createElement('script')
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`
-    script.async = true
-    script.onload = () => resolve(window.google.maps)
-    script.onerror = reject
-    document.head.appendChild(script)
-  })
-}
+// Fix for default Leaflet icon paths in builds
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
 
-// Static map fallback (no API key needed, using OpenStreetMap embed)
-function StaticMap({ lat, lng, hostelName, logs }) {
-  const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${lng-0.01}%2C${lat-0.01}%2C${lng+0.01}%2C${lat+0.01}&layer=mapnik&marker=${lat}%2C${lng}`
-  return (
-    <div style={{ position: 'relative' }}>
-      <iframe
-        src={mapUrl}
-        style={{ width: '100%', height: 380, border: 'none', borderRadius: 10 }}
-        title="Hostel Location"
-        loading="lazy"
-      />
-      <div style={{
-        position: 'absolute', bottom: 10, left: 10,
-        background: 'rgba(0,0,0,.8)', color: '#fff', padding: '8px 12px',
-        borderRadius: 8, fontSize: 12, backdropFilter: 'blur(4px)',
-        border: '1px solid rgba(255,255,255,.15)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <SvgIcon d={ICONS.pin} size={12} />
-          <span style={{ fontWeight: 700 }}>{hostelName}</span>
-        </div>
-        <div style={{ color: '#aaa', marginTop: 2 }}>{lat.toFixed(4)}, {lng.toFixed(4)}</div>
-      </div>
-      <div style={{
-        position: 'absolute', top: 10, right: 10,
-        background: 'rgba(240,165,0,.9)', color: '#000', padding: '4px 10px',
-        borderRadius: 6, fontSize: 11, fontWeight: 700
-      }}>
-        OpenStreetMap · Add API key for full Google Maps
-      </div>
-    </div>
-  )
-}
+// Custom markers
+const hostelIcon = L.divIcon({
+  html: '<div class="map-marker hostel">🏠</div>',
+  className: 'custom-div-icon',
+  iconSize: [40, 40],
+  iconAnchor: [20, 20],
+  popupAnchor: [0, -20]
+});
 
-// Google Maps component with markers
-function GoogleMapView({ apiKey, lat, lng, hostelName, logs }) {
-  const mapRef = useRef(null)
-  const mapInstance = useRef(null)
-  const [loaded, setLoaded] = useState(false)
-  const [error, setError] = useState(null)
+const inIcon = L.divIcon({
+  html: '<div class="map-marker in">🟢</div>',
+  className: 'custom-div-icon',
+  iconSize: [24, 24],
+  iconAnchor: [12, 12],
+  popupAnchor: [0, -12]
+});
 
+const outIcon = L.divIcon({
+  html: '<div class="map-marker out">🔴</div>',
+  className: 'custom-div-icon',
+  iconSize: [24, 24],
+  iconAnchor: [12, 12],
+  popupAnchor: [0, -12]
+});
+
+// Component to handle map centering and updating when coordinates change
+function MapController({ center }) {
+  const map = useMap()
   useEffect(() => {
-    if (!apiKey) return
-    loadGoogleMaps(apiKey)
-      .then((maps) => {
-        if (!mapRef.current) return
-        const map = new maps.Map(mapRef.current, {
-          center: { lat, lng },
-          zoom: 16,
-          styles: [
-            { elementType: 'geometry', stylers: [{ color: '#0f1623' }] },
-            { elementType: 'labels.text.stroke', stylers: [{ color: '#0f1623' }] },
-            { elementType: 'labels.text.fill', stylers: [{ color: '#7a8fa6' }] },
-            { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#1e2d45' }] },
-            { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#020c18' }] },
-            { featureType: 'poi', elementType: 'geometry', stylers: [{ color: '#172033' }] },
-          ],
-          mapTypeControl: false,
-          streetViewControl: false,
-          fullscreenControl: true,
-        })
-
-        // Hostel marker
-        new maps.Marker({
-          position: { lat, lng },
-          map,
-          title: hostelName,
-          icon: {
-            path: maps.SymbolPath.CIRCLE,
-            scale: 14,
-            fillColor: '#f0a500',
-            fillOpacity: 1,
-            strokeColor: '#fff',
-            strokeWeight: 2,
-          },
-          label: { text: '🏠', fontSize: '18px' },
-        })
-
-        // Check-in markers (last 20)
-        logs.slice(0, 20).forEach(log => {
-          if (log.in_lat && log.in_lng) {
-            new maps.Marker({
-              position: { lat: log.in_lat, lng: log.in_lng },
-              map,
-              title: `${log.residents?.full_name} — Check In`,
-              icon: {
-                path: maps.SymbolPath.CIRCLE,
-                scale: 8,
-                fillColor: '#22c55e',
-                fillOpacity: 0.9,
-                strokeColor: '#fff',
-                strokeWeight: 1.5,
-              },
-            })
-          }
-          if (log.out_lat && log.out_lng) {
-            new maps.Marker({
-              position: { lat: log.out_lat, lng: log.out_lng },
-              map,
-              title: `${log.residents?.full_name} — Check Out`,
-              icon: {
-                path: maps.SymbolPath.CIRCLE,
-                scale: 8,
-                fillColor: '#ef4444',
-                fillOpacity: 0.9,
-                strokeColor: '#fff',
-                strokeWeight: 1.5,
-              },
-            })
-          }
-        })
-
-        mapInstance.current = map
-        setLoaded(true)
-      })
-      .catch(() => setError('Failed to load Google Maps. Check your API key.'))
-  }, [apiKey, lat, lng, hostelName, logs])
-
-  if (error) return <div style={{ padding: 20, color: 'var(--red)', background: 'var(--surface2)', borderRadius: 10 }}>{error}</div>
-  if (!apiKey) return <StaticMap lat={lat} lng={lng} hostelName={hostelName} logs={logs} />
-
-  return (
-    <div ref={mapRef} style={{ width: '100%', height: 380, borderRadius: 10, background: 'var(--surface2)' }}>
-      {!loaded && (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 12, color: 'var(--muted)' }}>
-          <div style={{ width: 20, height: 20, border: '2px solid var(--border)', borderTopColor: 'var(--accent)', borderRadius: '50%', animation: 'spin .6s linear infinite' }} />
-          Loading map…
-        </div>
-      )}
-    </div>
-  )
+    map.setView(center, map.getZoom())
+  }, [center, map])
+  return null
 }
 
-// Main Map Monitoring Panel
 export default function MapMonitor({ logs = [] }) {
-  const { settings } = useApp()
+  const { settings, theme } = useApp()
   const lat = parseFloat(settings.lat) || 23.8103
   const lng = parseFloat(settings.lng) || 90.4125
-  const apiKey = settings.google_maps_api_key || ''
   const hostelName = settings.hostel_name || 'Hostel'
+  
+  const center = [lat, lng]
 
   const todayLogs = logs.filter(l => {
     const d = new Date(l.created_at)
@@ -162,22 +60,68 @@ export default function MapMonitor({ logs = [] }) {
     return d.toDateString() === today.toDateString()
   })
 
+  // Dark mode tile layer if needed, otherwise light
+  // Using Jawg Maps or Jawg Dark requires API key, so we'll sticking to standard OSM
+  // or use CartoDB Dark Matter which is free for low traffic.
+  const tileUrl = theme === 'dark' 
+    ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+    : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+
+  const attribution = theme === 'dark'
+    ? '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+    : '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors'
+
   return (
     <div>
       <div style={{ marginBottom: 14 }}>
         <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 2 }}>📍 Hostel Location & Entry Log</div>
         <div style={{ fontSize: 12, color: 'var(--muted)' }}>
-          {apiKey ? 'Google Maps active' : 'Using OpenStreetMap preview — add Google Maps API key in Settings for full features'}
+          Powered by Leaflet & OpenStreetMap
         </div>
       </div>
 
-      <GoogleMapView apiKey={apiKey} lat={lat} lng={lng} hostelName={hostelName} logs={logs} />
+      <div style={{ width: '100%', height: 380, borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface2)' }}>
+        <MapContainer center={center} zoom={16} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
+          <TileLayer attribution={attribution} url={tileUrl} />
+          <MapController center={center} />
+          
+          {/* Hostel Marker */}
+          <Marker position={center} icon={hostelIcon}>
+            <Popup>
+              <strong>{hostelName}</strong><br/>
+              {lat.toFixed(4)}, {lng.toFixed(4)}
+            </Popup>
+          </Marker>
+
+          {/* Log Markers (last 20) */}
+          {logs.slice(0, 20).map(log => (
+            <div key={log.id}>
+              {log.in_lat && log.in_lng && (
+                <Marker position={[parseFloat(log.in_lat), parseFloat(log.in_lng)]} icon={inIcon}>
+                  <Popup>
+                    <strong>{log.residents?.full_name}</strong><br/>
+                    Check In at {log.in_time?.slice(0, 5)}
+                  </Popup>
+                </Marker>
+              )}
+              {log.out_lat && log.out_lng && (
+                <Marker position={[parseFloat(log.out_lat), parseFloat(log.out_lng)]} icon={outIcon}>
+                  <Popup>
+                    <strong>{log.residents?.full_name}</strong><br/>
+                    Check Out at {log.out_time?.slice(0, 5)}
+                  </Popup>
+                </Marker>
+              )}
+            </div>
+          ))}
+        </MapContainer>
+      </div>
 
       {/* Legend */}
       <div style={{ display: 'flex', gap: 20, marginTop: 12, fontSize: 12 }}>
-        {[['🟡', 'Hostel'],['🟢', 'Check-in location'],['🔴', 'Check-out location']].map(([dot, label]) => (
+        {[['🏠', 'Hostel'],['🟢', 'Check-in location'],['🔴', 'Check-out location']].map(([dot, label]) => (
           <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--muted)' }}>
-            <span>{dot}</span>{label}
+            <span style={{ fontSize: 14 }}>{dot}</span>{label}
           </div>
         ))}
       </div>
@@ -198,8 +142,6 @@ export default function MapMonitor({ logs = [] }) {
                   <th>Room</th>
                   <th>Check-In Time</th>
                   <th>Check-Out Time</th>
-                  <th>In Location</th>
-                  <th>Out Location</th>
                   <th>Status</th>
                 </tr>
               </thead>
@@ -214,12 +156,6 @@ export default function MapMonitor({ logs = [] }) {
                     <td style={{ color: log.out_time ? 'var(--red)' : 'var(--muted)' }}>
                       {log.out_time ? log.out_time.slice(0, 5) : '—'}
                     </td>
-                    <td style={{ fontSize: 11, color: 'var(--muted)' }}>
-                      {log.in_lat ? `${parseFloat(log.in_lat).toFixed(4)}, ${parseFloat(log.in_lng).toFixed(4)}` : '—'}
-                    </td>
-                    <td style={{ fontSize: 11, color: 'var(--muted)' }}>
-                      {log.out_lat ? `${parseFloat(log.out_lat).toFixed(4)}, ${parseFloat(log.out_lng).toFixed(4)}` : '—'}
-                    </td>
                     <td>
                       <span className={`badge ${log.status === 'active' ? 'badge-green' : 'badge-muted'}`}>
                         {log.status === 'active' ? 'Inside' : 'Checked Out'}
@@ -232,6 +168,42 @@ export default function MapMonitor({ logs = [] }) {
           </div>
         )}
       </div>
+      
+      <style>{`
+        .custom-div-icon {
+          background: transparent;
+          border: none;
+        }
+        .map-marker {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 20px;
+          filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+          transition: transform 0.2s;
+        }
+        .map-marker:hover {
+          transform: scale(1.2);
+        }
+        .map-marker.hostel {
+          font-size: 28px;
+          background: rgba(240, 165, 0, 0.2);
+          border-radius: 50%;
+          width: 40px;
+          height: 40px;
+          border: 1px solid #f0a500;
+        }
+        .leaflet-popup-content-wrapper {
+          background: var(--surface);
+          color: var(--text);
+          border: 1px solid var(--border);
+          border-radius: 8px;
+        }
+        .leaflet-popup-tip {
+          background: var(--surface);
+          border: 1px solid var(--border);
+        }
+      `}</style>
     </div>
   )
 }

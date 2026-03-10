@@ -1,63 +1,14 @@
-// Premium SVG Logo Component
+import logo from '../assets/logo.png'
+
+// Premium Logo Component using official BCH branding
 export function PremiumLogo({ className = '', size = 32 }) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 100 100"
+    <img
+      src={logo}
+      alt="BCH Logo"
       className={className}
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      {/* Background gradient */}
-      <defs>
-        <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style={{ stopColor: 'var(--accent)', stopOpacity: 1 }} />
-          <stop offset="100%" style={{ stopColor: 'var(--accent2)', stopOpacity: 1 }} />
-        </linearGradient>
-        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="2" dy="2" stdDeviation="3" floodColor="rgba(0,0,0,0.3)"/>
-        </filter>
-      </defs>
-
-      {/* Main building shape */}
-      <rect
-        x="20"
-        y="30"
-        width="60"
-        height="50"
-        rx="8"
-        fill="url(#logoGrad)"
-        filter="url(#shadow)"
-      />
-
-      {/* Windows */}
-      <rect x="30" y="40" width="8" height="6" rx="1" fill="rgba(255,255,255,0.9)" />
-      <rect x="45" y="40" width="8" height="6" rx="1" fill="rgba(255,255,255,0.9)" />
-      <rect x="60" y="40" width="8" height="6" rx="1" fill="rgba(255,255,255,0.9)" />
-
-      <rect x="30" y="55" width="8" height="6" rx="1" fill="rgba(255,255,255,0.9)" />
-      <rect x="45" y="55" width="8" height="6" rx="1" fill="rgba(255,255,255,0.9)" />
-      <rect x="60" y="55" width="8" height="6" rx="1" fill="rgba(255,255,255,0.9)" />
-
-      {/* Door */}
-      <rect x="42" y="65" width="16" height="15" rx="2" fill="#2d3748" />
-      <circle cx="46" cy="72" r="1.5" fill="#fbbf24" />
-
-      {/* Roof */}
-      <polygon
-        points="15,30 50,15 85,30"
-        fill="var(--accent2)"
-        filter="url(#shadow)"
-      />
-
-      {/* Chimney */}
-      <rect x="65" y="18" width="6" height="12" rx="1" fill="#4a5568" />
-
-      {/* Stars for premium feel */}
-      <circle cx="15" cy="15" r="1.5" fill="#fbbf24" opacity="0.8" />
-      <circle cx="85" cy="20" r="1" fill="#fbbf24" opacity="0.6" />
-      <circle cx="10" cy="25" r="1" fill="#fbbf24" opacity="0.7" />
-    </svg>
+      style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover' }}
+    />
   )
 }
 
