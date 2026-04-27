@@ -58,7 +58,7 @@ export function AppProvider({ children }) {
     total_floors: 4
   })
   const [notifications, setNotifications] = useState([])
-  const [showLanding, setShowLanding] = useState(false)
+  const [showLanding, setShowLanding] = useState(!localStorage.getItem('dh-seen-landing'))
 
   const toggleTheme = () => {
     const next = themeName === 'midnight' ? 'slate' : 'midnight'
@@ -71,17 +71,40 @@ export function AppProvider({ children }) {
   }, [themeName])
 
   const theme = THEMES[themeName] || THEMES.midnight
-  const [connected] = useState(true)
-  const [user, setUser] = useState({ id: 'demo', email: 'admin@dormhq.com', user_metadata: { full_name: 'Admin Demo' } })
-  const [profile, setProfile] = useState({ role: 'admin' })
-  const [loading, setLoading] = useState(false)
+  const [connected] = useState(isConnected)
+  const [user, setUser] = useState(null)
+  const [profile, setProfile] = useState(null)
+  const [loading, setLoading] = useState(true)
   const [language, setLanguage] = useState(() => localStorage.getItem('dh-lang') || 'en')
   const { t } = useTranslation(language)
 
-  // Authentication (Bypassed for Demo)
+  // Authentication
   useEffect(() => {
-    setLoading(false)
-  }, [])
+    if (!connected) { setLoading(false); return }
+    const getInitialSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      setUser(session?.user ?? null)
+      if (session?.user) {
+        const { data: profile } = await profilesApi.getCurrent()
+        setProfile(profile)
+      }
+      setLoading(false)
+    }
+    getInitialSession()
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      setUser(session?.user ?? null)
+      if (session?.user) {
+        const { data: profile } = await profilesApi.getCurrent()
+        setProfile(profile)
+      } else {
+        setProfile(null)
+      }
+      setLoading(false)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [connected])
 
   // Auth methods
   const signUp = async (email, password, fullName) => {
