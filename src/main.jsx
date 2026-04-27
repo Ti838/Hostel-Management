@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
+import 'leaflet/dist/leaflet.css'
 import './index.css'
 import { Toaster } from 'react-hot-toast'
 
@@ -14,7 +15,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           background: 'var(--surface)',
           color: 'var(--text)',
           border: '1px solid var(--border)',
-          fontFamily: 'Syne, sans-serif',
+          fontFamily: 'Outfit, sans-serif',
           fontSize: '13px',
         },
       }}

@@ -1,22 +1,28 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;1,9..144,400&family=Syne:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
 
-/* ── THEMES ─────────────────────────────────────────────── */
+/* ── BACKGROUND ANIMATION ───────────────────────────────── */
+@keyframes meshGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}/* ── THEMES ─────────────────────────────────────────────── */
 :root {
-  --bg: #080c14;
-  --surface: #0f1623;
-  --surface2: #172033;
-  --border: #1e2d45;
+  --bg: #050505;
+  --surface: #0a0a0a;
+  --surface2: #141414;
+  --border: #222222;
   --accent: #f0a500;
   --accent2: #e05c2f;
-  --text: #e8f0fe;
-  --muted: #7a8fa6;
-  --green: #22c55e;
+  --text: #ffffff;
+  --muted: #888888;
+  --green: #10b981;
   --red: #ef4444;
   --blue: #3b82f6;
-  --purple: #a78bfa;
-  --radius: 12px;
-  --sidebar-w: 230px;
+  --purple: #8b5cf6;
+  --radius: 16px;
+  --sidebar-w: 240px;
   --accent-fg: #000000;
+  --glow-accent: rgba(240, 165, 0, 0.25);
 }
 
 [data-theme="slate"] {
@@ -123,6 +129,28 @@
   border: 1px solid rgba(15, 23, 42, 0.05);
 }
 
+[data-theme="slate"] .sidebar {
+  background: rgba(255, 255, 255, 0.75);
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="slate"] .topbar {
+  background: rgba(255, 255, 255, 0.6);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="slate"] body {
+  background: radial-gradient(circle at top left, #e2e8f0 0%, #f8fafc 100%);
+}
+
+[data-theme="slate"] .stat-card:hover {
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.12);
+}
+
+[data-theme="slate"] .card:hover {
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.1);
+}
+
 *,
 *::before,
 *::after {
@@ -132,12 +160,14 @@
 }
 
 body {
-  font-family: 'Syne', sans-serif;
-  background: var(--bg);
+  font-family: 'Outfit', sans-serif;
+  background: radial-gradient(circle at top left, var(--surface2) 0%, var(--bg) 100%);
   color: var(--text);
   min-height: 100vh;
   transition: background .4s, color .4s;
   overflow-x: hidden;
+  background-size: 200% 200%;
+  animation: meshGradient 15s ease infinite;
 }
 
 /* ── SCROLLBAR ──────────────────────────────────────────── */
@@ -165,8 +195,10 @@ body {
 /* ── SIDEBAR ────────────────────────────────────────────── */
 .sidebar {
   width: var(--sidebar-w);
-  background: var(--surface);
-  border-right: 1px solid var(--border);
+  background: rgba(10, 10, 10, 0.65);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
   display: flex;
   flex-direction: column;
   position: fixed;
@@ -382,8 +414,8 @@ body {
 
 .topbar {
   height: 58px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  background: rgba(10, 10, 10, 0.4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   padding: 0 22px;
   display: flex;
   align-items: center;
@@ -391,7 +423,8 @@ body {
   position: sticky;
   top: 0;
   z-index: 40;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
 }
 
 .topbar-title h1 {
@@ -554,11 +587,14 @@ body {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 18px;
-  transition: border-color .2s, box-shadow .2s;
+  transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .card:hover {
-  border-color: rgba(240, 165, 0, .18);
+  border-color: var(--accent);
+  box-shadow: 0 8px 30px var(--glow-accent);
+  transform: translateY(-2px);
 }
 
 .card-hdr {
@@ -588,12 +624,14 @@ body {
   padding: 16px;
   position: relative;
   overflow: hidden;
-  transition: transform .2s, box-shadow .2s;
+  transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, .3);
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 12px 40px var(--glow-accent);
+  border-color: var(--accent);
 }
 
 .stat-card::before {

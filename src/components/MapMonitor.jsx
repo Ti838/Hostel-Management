@@ -47,7 +47,7 @@ function MapController({ center }) {
 }
 
 export default function MapMonitor({ logs = [] }) {
-  const { settings, theme } = useApp()
+  const { settings, themeName } = useApp()
   const lat = parseFloat(settings.lat) || 23.8103
   const lng = parseFloat(settings.lng) || 90.4125
   const hostelName = settings.hostel_name || 'Hostel'
@@ -63,11 +63,12 @@ export default function MapMonitor({ logs = [] }) {
   // Dark mode tile layer if needed, otherwise light
   // Using Jawg Maps or Jawg Dark requires API key, so we'll sticking to standard OSM
   // or use CartoDB Dark Matter which is free for low traffic.
-  const tileUrl = theme === 'dark' 
+  const isDark = themeName !== 'slate'
+  const tileUrl = isDark 
     ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
     : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 
-  const attribution = theme === 'dark'
+  const attribution = isDark
     ? '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
     : '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors'
 
